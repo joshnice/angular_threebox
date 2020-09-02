@@ -14,8 +14,6 @@ export class MapComponent implements OnInit {
 
   map: mapboxgl.Map;
   style = 'mapbox://styles/mapbox/streets-v11';
-  lat = 37.75;
-  lng = -122.41;
 
   constructor() {
     this.threebox_mediator = new ThreeboxMediator();
@@ -29,8 +27,9 @@ export class MapComponent implements OnInit {
     this.map = new mapboxgl.Map({
       container: 'map',
       style: this.style,
-      zoom: 13,
-      center: [this.lng, this.lat]
+      zoom: 20,
+      center: [0, 0],
+      hash: true
     });
 
     this.map.addControl(new mapboxgl.NavigationControl());
@@ -40,11 +39,19 @@ export class MapComponent implements OnInit {
 
   startThreebox() {
     this.map.on('style.load', () => {
-      console.log('map has loaded');
-      console.log('threebox med', this.threebox_mediator);
       this.threebox_mediator.initialise(this.map);
+
+      this.map.addLayer({
+        id: 'custom_layer',
+        type: 'custom',
+        renderingMode: '3d',
+        onAdd: (map, mbxContext) => {
+          this.threebox_mediator.addModel();
+        },
+        render: (gl, matrix) => {
+          this.threebox_mediator.update();
+        }
+      });
     });
   }
-
-
 }
